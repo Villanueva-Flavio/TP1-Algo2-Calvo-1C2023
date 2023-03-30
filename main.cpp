@@ -364,31 +364,37 @@ void efectuarColision(Tablero_t* tablero, int jugador, int soldado){
     }
 }
 
+void comprobarInactivas(CasilleroInactivo_t* inactivos, int* cantidadInactivos){
+    CasilleroInactivo aux;
+    for(int i = 0; i < *cantidadInactivos; i++){
+        if(inactivos[i].turnosRestantes == 0){
+            inactivos[i].posicion = {-1, -1};
+            aux = inactivos[(*cantidadInactivos)-1];
+            inactivos[(*cantidadInactivos)-1] = inactivos[i];
+            inactivos[i] = aux;
+            (*cantidadInactivos)--;
+        } else {
+            inactivos[i].turnosRestantes--;
+        }
+    }
+}
+
 void moverSoldado(Tablero_t* tablero, int jugador, int soldadoAMover){
     string direccion;
     Coordenada_t aux;
-
     cout << "Seleccione la direccion a la que desea moverlo (W A S D W-A W-D S-A S-D): ";
-    
     do{
         obtenerDireccion(&direccion);
         aux = obtenerCoordenadaNueva(tablero->jugadores[jugador-1].soldados[soldadoAMover], direccion);
     } while(!coordenadaMovible(tablero, aux, jugador));
     copiarCoordenada(&tablero->jugadores[jugador].soldados[soldadoAMover], aux);
-    efectuarColision(tablero, jugador, soldadoAMover);
-    // Chequear colision y efectuar acciones
-    // Soldado - Soldado (Ambos mueren)
-    // Soldado - Mina (Ambos desaparecen)
-    //    Celda inactiva 5 turnos
-
 }
 
 void turnoJugador(Tablero_t* tablero, int jugador){
-    //Preguntar a donde quiere moverlo
-    //Comprobar si hay mina
-    //Comprobar si hay soldado
     int soldadoAMover = seleccionarSoldado(tablero->jugadores[jugador]) -1;
     moverSoldado(tablero, jugador, soldadoAMover);
+    efectuarColision(tablero, jugador, soldadoAMover);
+    comprobarInactivas(tablero->casillerosInactivos, &tablero->cantidadInactivos);
 }
 
 void jugar(Tablero_t* tablero){
