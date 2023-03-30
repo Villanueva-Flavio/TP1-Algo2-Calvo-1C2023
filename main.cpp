@@ -13,6 +13,7 @@
 #define MAX_SOLDADOS 4
 #define JUGADORES 2
 
+using namespace std;
 
 typedef struct Coordenada{
     int x;
@@ -40,7 +41,6 @@ typedef struct Tablero{
     int cantidadInactivos;
 }Tablero_t;
 
-using namespace std;
 const string FILE_NAME[JUGADORES] = {"jugador1.txt", "jugador2.txt"};
 
 const unordered_map<string, Coordenada_t> coordenadas_nuevas = {
@@ -53,15 +53,6 @@ const unordered_map<string, Coordenada_t> coordenadas_nuevas = {
     {"S-A", {-1, 1}},
     {"S-D", {1, 1}}
 };
-// Toma de notas
-
-// Si la mina explota, se inactiva por 5 turnos
-// Soldado -> Muere si pisa mina
-// Si 2 soldados chocan ambos mueren
-// El jugador luego de dejar la mina, puede optar por
-//    mover un soldado Horiz, Vert, Diag
-
-
 
 bool estaEnRango(int x, int y){
     return (x >= 0 && x < SIZE && y >= 0 && y < SIZE);
@@ -132,12 +123,9 @@ void mensajeFinal(int estado){
     }
 }
 
-
-
 Coordenada_t coordenadaAleatoria(){
     return {rand() % SIZE, rand() % SIZE};
 }
-
 
 bool coordenadaLibre(Tablero_t tablero, Coordenada_t posicion){
     return !estaEnArray(tablero.jugadores[0].minas, tablero.jugadores[0].minasRestantes, posicion) &&
@@ -154,7 +142,6 @@ Coordenada_t coordenadaLibreAleatoria(Tablero_t tablero){
     return posicion;
 }
 
-// Considerar coordenada libre y que este in range
 void preguntarCoordenada(Tablero_t tablero, Coordenada_t* posicion){
     cout << "Ingrese las 2 coordenadas en el siguiente formato -> x y: ";
     cin >> posicion->x >> posicion->y;
@@ -178,7 +165,6 @@ void cargaAutomatica(Tablero_t* tablero){
 }
 
 void cargaManual(Tablero_t* tablero){
-
     for(int i = 0; i < JUGADORES; i++){
         for(int j = 0; j < tablero->jugadores[i].minasRestantes; j++){
             system("clear");
@@ -193,7 +179,6 @@ void cargaManual(Tablero_t* tablero){
     }
 }
 
-
 void cargarJuego(Tablero_t* tablero, bool automatico){
     tablero->estado = 0;
     tablero->turno = 1;
@@ -206,18 +191,11 @@ void cargarJuego(Tablero_t* tablero, bool automatico){
 }
 
 void mostrarTablero(Tablero_t tablero){
-    /*
-        Jugador <NOMBRE>:
-        Minas restantes: <MINAS>
-        Soldados restantes: <SOLDADOS>
-
-        <Tablero con todos los soldados y mis minas>
-    */
-
     FILE* file = fopen(FILE_NAME[0].c_str(), "w");
     FILE* file2 = fopen(FILE_NAME[1].c_str(), "w");
     FILE* fileActual;
     char equipoSoldado;
+
     for(int i = 0; i < JUGADORES; i++){
         fileActual = i == 0? file : file2;
         fprintf(fileActual, "Jugador %s:\n", tablero.jugadores[i].nombre.c_str());
@@ -226,7 +204,6 @@ void mostrarTablero(Tablero_t tablero){
 
         for(int j = 0; j < SIZE; j++){
             for(int k = 0; k < SIZE; k++){
-
                 if(estaEnArray(tablero.jugadores[i].minas, tablero.jugadores[i].minasRestantes, {j, k})){
                     fprintf(fileActual, "M ");
                 }else if(estaEnArray(tablero.jugadores[i].soldados, tablero.jugadores[i].soldadosRestantes, {j, k})){
@@ -238,7 +215,6 @@ void mostrarTablero(Tablero_t tablero){
                 }else{
                     fprintf(fileActual, "  ");
                 }
-
             }
             fprintf(fileActual, "\n");
         }
@@ -248,11 +224,6 @@ void mostrarTablero(Tablero_t tablero){
 }
 
 void comprobarEstado(Jugador_t jug1, Jugador_t jug2, int* estado){
-    // si estado = 1 => gano el jugador 1
-    // si estado = 2 => gano el jugador 2
-    // si estado = 3 => empate
-    // si estado = 0 => no hay ganador
-
     if(jug1.soldadosRestantes == 0 && jug2.soldadosRestantes == 0){
         *estado = 3;
     }else if(jug1.soldadosRestantes == 0){
@@ -262,7 +233,6 @@ void comprobarEstado(Jugador_t jug1, Jugador_t jug2, int* estado){
     } else {
         *estado = 0;
     }
-
 }
 
 int seleccionarSoldado(Jugador_t jugador){
@@ -418,9 +388,8 @@ int main() {
     srand((unsigned int)time(NULL));
     Tablero_t tablero;
     bool automatico = false;
-
-    iniciarParametros(&tablero, &automatico); // VERIFICADO
-    cargarJuego(&tablero, automatico); // VERIFICADO
+    iniciarParametros(&tablero, &automatico);
+    cargarJuego(&tablero, automatico);
     jugar(&tablero);
     mensajeFinal(tablero.estado);
     return 0;
