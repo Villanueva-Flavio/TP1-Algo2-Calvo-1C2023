@@ -3,7 +3,6 @@
 #include <cstdlib>
 #include <string>
 #include <unordered_map>
-
 #define SIZE 20
 #define VACIO ' '
 #define INACTIVO 'X'
@@ -14,9 +13,36 @@
 #define MAX_SOLDADOS 4
 #define JUGADORES 2
 
-using namespace std;
 
+typedef struct Coordenada{
+    int x;
+    int y;
+} Coordenada_t;
+
+typedef struct CasilleroInactivo{
+    Coordenada_t posicion;
+    int turnosRestantes;
+} CasilleroInactivo_t;
+
+typedef struct Jugador{
+    std::string nombre;
+    Coordenada_t minas[MAX_MINAS];
+    Coordenada_t soldados[MAX_SOLDADOS];
+    int soldadosRestantes;
+    int minasRestantes;
+} Jugador_t;
+
+typedef struct Tablero{
+    CasilleroInactivo_t casillerosInactivos[MAX_MINAS];
+    Jugador_t jugadores[JUGADORES];
+    int turno;
+    int estado;
+    int cantidadInactivos;
+}Tablero_t;
+
+using namespace std;
 const string FILE_NAME[JUGADORES] = {"jugador1.txt", "jugador2.txt"};
+
 const unordered_map<string, Coordenada_t> coordenadas_nuevas = {
     {"W", {0, -1}},
     {"A", {-1, 0}},
@@ -35,31 +61,7 @@ const unordered_map<string, Coordenada_t> coordenadas_nuevas = {
 // El jugador luego de dejar la mina, puede optar por
 //    mover un soldado Horiz, Vert, Diag
 
-typedef struct Coordenada{
-    int x;
-    int y;
-} Coordenada_t;
 
-typedef struct CasilleroInactivo{
-    Coordenada_t posicion;
-    int turnosRestantes;
-} CasilleroInactivo_t;
-
-typedef struct Jugador{
-    string nombre;
-    Coordenada_t minas[MAX_MINAS];
-    Coordenada_t soldados[MAX_SOLDADOS];
-    int soldadosRestantes;
-    int minasRestantes;
-} Jugador_t;
-
-typedef struct Tablero{
-    CasilleroInactivo_t casillerosInactivos[MAX_MINAS];
-    Jugador_t jugadores[JUGADORES];
-    int turno;
-    int estado;
-    int cantidadInactivos;
-}Tablero_t;
 
 bool estaEnRango(int x, int y){
     return (x >= 0 && x < SIZE && y >= 0 && y < SIZE);
@@ -84,7 +86,7 @@ void preguntarNombre(string* nombre){
 }
 
 void preguntarCantidadMinas(int* minas){
-    cout << "Ingrese la cantidad de minas (MAX: %i): " << MAX_MINAS << endl;
+    cout << "Ingrese la cantidad de minas (MAX: 100): " << endl;
     cin >> *minas;
     while (*minas > MAX_MINAS || *minas < 1) {
         cout << "Ingrese la cantidad de minas: ";
@@ -109,6 +111,7 @@ void iniciarParametros(Tablero_t* tablero, bool* automatico){
     for(int i = 0; i < JUGADORES; i++){
         preguntarNombre(&tablero->jugadores[i].nombre);
         preguntarMetodoInsercion(automatico);
+        tablero->jugadores[i].soldadosRestantes = 4;
     }
 }
 
@@ -163,16 +166,13 @@ void preguntarCoordenada(Tablero_t tablero, Coordenada_t* posicion){
     }
 }
 
-
 void cargaAutomatica(Tablero_t* tablero){
     for(int i = 0; i < JUGADORES; i++){
         for(int j = 0; j < tablero->jugadores[i].minasRestantes; j++){
             tablero->jugadores[i].minas[j] = coordenadaLibreAleatoria(*tablero);
-            tablero->jugadores[i].minasRestantes ++;
         }
         for(int j = 0; j < tablero->jugadores[i].soldadosRestantes; j++){
             tablero->jugadores[i].soldados[j] = coordenadaLibreAleatoria(*tablero);
-            tablero->jugadores[i].soldadosRestantes ++;
         }
     }
 }
@@ -184,13 +184,11 @@ void cargaManual(Tablero_t* tablero){
             system("clear");
             cout << "Jugador " << i+1 << endl;
             preguntarCoordenada(*tablero, &tablero->jugadores[i].minas[j]);
-            tablero->jugadores[i].minasRestantes ++;
         }
         for(int j = 0; j < tablero->jugadores[i].soldadosRestantes; j++){
             system("clear");
             cout << "Jugador " << i+1 << endl;
             preguntarCoordenada(*tablero, &tablero->jugadores[i].soldados[j]);
-            tablero->jugadores[i].soldadosRestantes ++;
         }
     }
 }
@@ -249,16 +247,22 @@ void mostrarTablero(Tablero_t tablero){
     fclose(file2);
 }
 
-void comprobarEstado(Coordenada_t soldados1[MAX_SOLDADOS], Coordenada_t soldados2[MAX_SOLDADOS], int* estado){
-    if(estaEnArray(soldados1, MAX_SOLDADOS, soldados1[0]) && estaEnArray(soldados2, MAX_SOLDADOS, soldados2[0])){
+void comprobarEstado(Jugador_t jug1, Jugador_t jug2, int* estado){
+    // si estado = 1 => gano el jugador 1
+    // si estado = 2 => gano el jugador 2
+    // si estado = 3 => empate
+    // si estado = 0 => no hay ganador
+
+    if(jug1.soldadosRestantes == 0 && jug2.soldadosRestantes == 0){
         *estado = 3;
-    } else if (estaEnArray(soldados1, MAX_SOLDADOS, soldados1[0])){
+    }else if(jug1.soldadosRestantes == 0){
         *estado = 2;
-    } else if (estaEnArray(soldados2, MAX_SOLDADOS, soldados2[0])){
+    }else if(jug2.soldadosRestantes == 0){
         *estado = 1;
     } else {
         *estado = 0;
     }
+
 }
 
 int seleccionarSoldado(Jugador_t jugador){
@@ -385,7 +389,7 @@ void moverSoldado(Tablero_t* tablero, int jugador, int soldadoAMover){
     cout << "Seleccione la direccion a la que desea moverlo (W A S D W-A W-D S-A S-D): ";
     do{
         obtenerDireccion(&direccion);
-        aux = obtenerCoordenadaNueva(tablero->jugadores[jugador-1].soldados[soldadoAMover], direccion);
+        aux = obtenerCoordenadaNueva(tablero->jugadores[jugador].soldados[soldadoAMover], direccion);
     } while(!coordenadaMovible(tablero, aux, jugador));
     copiarCoordenada(&tablero->jugadores[jugador].soldados[soldadoAMover], aux);
 }
@@ -400,22 +404,23 @@ void turnoJugador(Tablero_t* tablero, int jugador){
 void jugar(Tablero_t* tablero){
     mostrarTablero(*tablero);
     while(tablero->estado == 0){
-        comprobarEstado(tablero->jugadores[1].soldados, tablero->jugadores[2].soldados, &tablero->estado);
+        comprobarEstado(tablero->jugadores[0], tablero->jugadores[1], &tablero->estado);
         if(tablero->estado != 0)
             break;
+        turnoJugador(tablero, 0);
         turnoJugador(tablero, 1);
-        turnoJugador(tablero, 2);
         mostrarTablero(*tablero);
+        tablero->turno++;
     }
 }
 
 int main() {
-    srand(time(NULL));
+    srand((unsigned int)time(NULL));
     Tablero_t tablero;
     bool automatico = false;
 
-    iniciarParametros(&tablero, &automatico);
-    cargarJuego(&tablero, automatico);
+    iniciarParametros(&tablero, &automatico); // VERIFICADO
+    cargarJuego(&tablero, automatico); // VERIFICADO
     jugar(&tablero);
     mensajeFinal(tablero.estado);
     return 0;
