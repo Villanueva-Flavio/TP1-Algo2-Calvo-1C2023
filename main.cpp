@@ -35,11 +35,15 @@ const unordered_map<string, Coordenada_t> coordenadas_nuevas = {
 // El jugador luego de dejar la mina, puede optar por
 //    mover un soldado Horiz, Vert, Diag
 
-
 typedef struct Coordenada{
     int x;
     int y;
 } Coordenada_t;
+
+typedef struct CasilleroInactivo{
+    Coordenada_t posicion;
+    int turnosRestantes;
+} CasilleroInactivo_t;
 
 typedef struct Jugador{
     string nombre;
@@ -50,9 +54,8 @@ typedef struct Jugador{
 } Jugador_t;
 
 typedef struct Tablero{
-    Coordenada_t casillerosInactivos[MAX_MINAS];
-    Jugador_t jugador1;
-    Jugador_t jugador2;
+    CasilleroInactivo_t casillerosInactivos[MAX_MINAS];
+    Jugador_t jugadores[JUGADORES];
     int turno;
     int estado;
     int cantidadInactivos;
@@ -101,11 +104,12 @@ void preguntarMetodoInsercion(bool* metodo){
 }
 
 void iniciarParametros(Tablero_t* tablero, bool* automatico){
-    preguntarNombre(&tablero->jugador1.nombre);
-    preguntarNombre(&tablero->jugador2.nombre);
-    preguntarCantidadMinas(&tablero->jugador1.minasRestantes);
-    tablero->jugador2.minasRestantes = tablero->jugador1.minasRestantes;
-    preguntarMetodoInsercion(automatico);
+    preguntarCantidadMinas(&tablero->jugadores[0].minasRestantes);
+    tablero->jugadores[1].minasRestantes = tablero->jugadores[0].minasRestantes;
+    for(int i = 0; i < JUGADORES; i++){
+        preguntarNombre(&tablero->jugadores[i].nombre);
+        preguntarMetodoInsercion(automatico);
+    }
 }
 
 void mensajeFinal(int estado){
@@ -133,10 +137,10 @@ Coordenada_t coordenadaAleatoria(){
 
 
 bool coordenadaLibre(Tablero_t tablero, Coordenada_t posicion){
-    return !estaEnArray(tablero.jugador1.minas, tablero.jugador1.minasRestantes, posicion) &&
-            !estaEnArray(tablero.jugador2.minas, tablero.jugador2.minasRestantes, posicion) &&
-            !estaEnArray(tablero.jugador1.soldados, tablero.jugador1.soldadosRestantes, posicion) &&
-            !estaEnArray(tablero.jugador2.soldados, tablero.jugador2.soldadosRestantes, posicion);
+    return !estaEnArray(tablero.jugadores[0].minas, tablero.jugadores[0].minasRestantes, posicion) &&
+            !estaEnArray(tablero.jugadores[1].minas, tablero.jugadores[1].minasRestantes, posicion) &&
+            !estaEnArray(tablero.jugadores[0].soldados, tablero.jugadores[0].soldadosRestantes, posicion) &&
+            !estaEnArray(tablero.jugadores[1].soldados, tablero.jugadores[1].soldadosRestantes, posicion);
 }
 
 Coordenada_t coordenadaLibreAleatoria(Tablero_t tablero){
@@ -161,41 +165,34 @@ void preguntarCoordenada(Tablero_t tablero, Coordenada_t* posicion){
 
 
 void cargaAutomatica(Tablero_t* tablero){
-    for(int i = 0; i < tablero->jugador1.minasRestantes; i++){
-            tablero->jugador1.minas[i] = coordenadaLibreAleatoria(*tablero);
-            tablero->jugador1.minasRestantes ++;
-            tablero->jugador2.minas[i] = coordenadaLibreAleatoria(*tablero);
-            tablero->jugador2.minasRestantes ++;
+    for(int i = 0; i < JUGADORES; i++){
+        for(int j = 0; j < tablero->jugadores[i].minasRestantes; j++){
+            tablero->jugadores[i].minas[j] = coordenadaLibreAleatoria(*tablero);
+            tablero->jugadores[i].minasRestantes ++;
         }
-        for(int i = 0; i < MAX_SOLDADOS; i++){
-            tablero->jugador1.soldados[i] = coordenadaLibreAleatoria(*tablero);
-            tablero->jugador1.soldadosRestantes ++;
-            tablero->jugador2.soldados[i] = coordenadaLibreAleatoria(*tablero);
-            tablero->jugador2.soldadosRestantes ++;
+        for(int j = 0; j < tablero->jugadores[i].soldadosRestantes; j++){
+            tablero->jugadores[i].soldados[j] = coordenadaLibreAleatoria(*tablero);
+            tablero->jugadores[i].soldadosRestantes ++;
         }
+    }
 }
 
 void cargaManual(Tablero_t* tablero){
-    for(int i = 0; i < tablero->jugador1.minasRestantes; i++){
-        system("clear");
-        cout << "Jugador 1" << endl;
-        preguntarCoordenada(*tablero, &tablero->jugador1.minas[i]);
-        tablero->jugador1.minas[i] = coordenadaLibreAleatoria(*tablero);
-        system("clear");
-        cout << "Jugador 2" << endl;
-        preguntarCoordenada(*tablero, &tablero->jugador2.minas[i]);
-        tablero->jugador2.minas[i] = coordenadaLibreAleatoria(*tablero);
+
+    for(int i = 0; i < JUGADORES; i++){
+        for(int j = 0; j < tablero->jugadores[i].minasRestantes; j++){
+            system("clear");
+            cout << "Jugador " << i+1 << endl;
+            preguntarCoordenada(*tablero, &tablero->jugadores[i].minas[j]);
+            tablero->jugadores[i].minasRestantes ++;
+        }
+        for(int j = 0; j < tablero->jugadores[i].soldadosRestantes; j++){
+            system("clear");
+            cout << "Jugador " << i+1 << endl;
+            preguntarCoordenada(*tablero, &tablero->jugadores[i].soldados[j]);
+            tablero->jugadores[i].soldadosRestantes ++;
+        }
     }
-    for(int i = 0; i < MAX_SOLDADOS; i++){
-        system("clear");
-        cout << "Jugador 1" << endl;
-        preguntarCoordenada(*tablero, &tablero->jugador1.soldados[i]);
-        tablero->jugador1.soldados[i] = coordenadaLibreAleatoria(*tablero);
-        system("clear");
-        cout << "Jugador 2" << endl;
-        preguntarCoordenada(*tablero, &tablero->jugador2.soldados[i]);
-        tablero->jugador2.soldados[i] = coordenadaLibreAleatoria(*tablero);
-    } 
 }
 
 
@@ -221,31 +218,33 @@ void mostrarTablero(Tablero_t tablero){
 
     FILE* file = fopen(FILE_NAME[0].c_str(), "w");
     FILE* file2 = fopen(FILE_NAME[1].c_str(), "w");
-    fprintf(file, "Jugador %s:\n", tablero.turno == 1? tablero.jugador1.nombre.c_str() : tablero.jugador2.nombre.c_str());
-    fprintf(file, "Minas restantes: %i\n", tablero.jugador1.minasRestantes - tablero.cantidadInactivos);
-    fprintf(file, "Soldados restantes: %i\n\n", MAX_SOLDADOS - tablero.cantidadInactivos);
-    fprintf(file2, "Jugador %s:\n", tablero.turno == 1? tablero.jugador2.nombre.c_str() : tablero.jugador1.nombre.c_str());
-    fprintf(file2, "Minas restantes: %i\n", tablero.jugador2.minasRestantes - tablero.cantidadInactivos);
-    fprintf(file2, "Soldados restantes: %i\n\n", MAX_SOLDADOS - tablero.cantidadInactivos);
-    for(int i = 0; i < SIZE; i++){
-        for(int j = 0; j < SIZE; j++){
-            if(estaEnArray(tablero.jugador1.minas, tablero.jugador1.minasRestantes, {i, j})){
-                fprintf(file, "M ");
-            } else if (estaEnArray(tablero.jugador2.minas, tablero.jugador2.minasRestantes, {i, j})){
-                fprintf(file2, "M ");
-            } else if (estaEnArray(tablero.jugador1.soldados, MAX_SOLDADOS, {i, j})){
-                fprintf(file, "S ");
-            } else if (estaEnArray(tablero.jugador2.soldados, MAX_SOLDADOS, {i, j})){ 
-                fprintf(file2, "S ");
-            } else {
-                fprintf(file, "  ");
-                fprintf(file2, "  ");
-            }
-        }
-        fprintf(file, "\n");
-        fprintf(file2, "\n");
-    }
+    FILE* fileActual;
+    char equipoSoldado;
+    for(int i = 0; i < JUGADORES; i++){
+        fileActual = i == 0? file : file2;
+        fprintf(fileActual, "Jugador %s:\n", tablero.jugadores[i].nombre.c_str());
+        fprintf(fileActual, "Minas restantes: %i\n", tablero.jugadores[i].minasRestantes);
+        fprintf(fileActual, "Soldados restantes: %i\n\n", tablero.jugadores[i].soldadosRestantes);
 
+        for(int j = 0; j < SIZE; j++){
+            for(int k = 0; k < SIZE; k++){
+
+                if(estaEnArray(tablero.jugadores[i].minas, tablero.jugadores[i].minasRestantes, {j, k})){
+                    fprintf(fileActual, "M ");
+                }else if(estaEnArray(tablero.jugadores[i].soldados, tablero.jugadores[i].soldadosRestantes, {j, k})){
+                    equipoSoldado = (i == 0)? '1' : '2';
+                    fprintf(fileActual, "%c ", equipoSoldado);
+                }else if(estaEnArray(tablero.jugadores[1-i].soldados, tablero.jugadores[1-i].soldadosRestantes, {j, k})){
+                    equipoSoldado = (i == 0)? '2' : '1';
+                    fprintf(fileActual, "%c ", equipoSoldado);
+                }else{
+                    fprintf(fileActual, "  ");
+                }
+
+            }
+            fprintf(fileActual, "\n");
+        }
+    }
     fclose(file);
     fclose(file2);
 }
@@ -294,20 +293,25 @@ bool colisionaConSoldado(Coordenada_t soldado, Coordenada_t soldados[MAX_SOLDADO
     return estaEnArray(soldados, MAX_SOLDADOS, soldado);
 }
 
+bool colisionaConInactivo(Coordenada_t soldado, CasilleroInactivo_t inactivos[MAX_MINAS], int inactivosRestantes){
+    for(int i = 0; i < inactivosRestantes; i++){
+        if(inactivos[i].posicion.x == soldado.x && inactivos[i].posicion.y == soldado.y){
+            return true;
+        }
+    }
+    return false;
+}
+
 bool coordenadaMovible(Tablero_t* tablero, Coordenada_t posicion, int jugador){
     bool resultado = true;
-    if((!estaEnRango(posicion.x, posicion.y)) ||
-    ((jugador == 1) && (
-      colisionaConMina(posicion, tablero->jugador1.minas, tablero->jugador1.minasRestantes) || 
-      colisionaConSoldado(posicion, tablero->jugador1.soldados) || 
-      colisionaConMina(posicion, tablero->casillerosInactivos, tablero->cantidadInactivos))) ||
-    ((jugador == 2) && (
-      colisionaConMina(posicion, tablero->jugador2.minas, tablero->jugador2.minasRestantes) || 
-      colisionaConSoldado(posicion, tablero->jugador2.soldados) || 
-      colisionaConMina(posicion, tablero->casillerosInactivos, tablero->cantidadInactivos)))) {
-
-        cout << "Coordenada Invalida" << endl;
-        resultado = false;
+    for(int i = 0; i < JUGADORES; i++){
+        if(!estaEnRango(posicion.x, posicion.y) || 
+        colisionaConMina(posicion, tablero->jugadores[i].minas, tablero->jugadores[i].minasRestantes) ||
+        colisionaConInactivo(posicion, tablero->casillerosInactivos, tablero->cantidadInactivos) ||
+        colisionaConSoldado(posicion, tablero->jugadores[i].soldados)) {
+            cout << "Coordenada Invalida" << endl;
+            resultado = false;
+        }
     }
     return resultado;
 }
@@ -317,13 +321,47 @@ void copiarCoordenada(Coordenada_t* destino, Coordenada_t fuente){
     destino->y = fuente.y;
 }
 
-void actualizarCasillerosInactivos(Tablero_t* tablero, Coordenada_t posicion){
-    tablero->casillerosInactivos[tablero->cantidadInactivos] = posicion;
+void actualizarCasillerosInactivos(Coordenada_t fuente, Tablero_t* tablero){
+    copiarCoordenada(&tablero->casillerosInactivos[tablero->cantidadInactivos].posicion, fuente);
+    tablero->casillerosInactivos[tablero->cantidadInactivos].turnosRestantes = 5;
     tablero->cantidadInactivos++;
 }
 
-void efectuarColision(Tablero_t* tablero, int jugador, int soldado){
+void swapCoordenada(int indice, int tope, Coordenada_t* posiciones){
+    Coordenada_t aux;
+    copiarCoordenada(&aux, posiciones[indice]);
+    copiarCoordenada(&posiciones[indice], posiciones[tope]);
+    copiarCoordenada(&posiciones[tope], aux);
+}
 
+void eliminarSoldado(Coordenada_t soldados[MAX_SOLDADOS], int* soldadosRestantes, int soldado){
+    soldados[soldado].x = -1;
+    soldados[soldado].y = -1;
+    swapCoordenada(soldado, *soldadosRestantes, soldados);
+    (*soldadosRestantes)--;
+}
+
+int findCoordenadaMatch(Coordenada_t soldados[MAX_SOLDADOS], int soldadosRestantes, Coordenada_t posicion){
+    int resultado = -1;
+    for(int i = 0; i < soldadosRestantes; i++){
+        if(soldados[i].x == posicion.x && soldados[i].y == posicion.y){
+            resultado = i;
+        }
+    }
+    return resultado;
+}
+
+void efectuarColision(Tablero_t* tablero, int jugador, int soldado){
+    Coordenada_t posicion = tablero->jugadores[jugador].soldados[soldado];
+    if(colisionaConMina(posicion, tablero->jugadores[jugador].minas, tablero->jugadores[jugador].minasRestantes)){
+        actualizarCasillerosInactivos(posicion, tablero);
+        tablero->jugadores[jugador].minasRestantes--;
+        eliminarSoldado(tablero->jugadores[jugador].soldados, &tablero->jugadores[jugador].soldadosRestantes, soldado);
+    } else if (colisionaConSoldado(posicion, tablero->jugadores[1-jugador].soldados)){
+        tablero->jugadores[1-jugador].soldadosRestantes--;
+        eliminarSoldado(tablero->jugadores[1-jugador].soldados, &tablero->jugadores[1-jugador].soldadosRestantes, findCoordenadaMatch(tablero->jugadores[1-jugador].soldados, MAX_SOLDADOS, posicion));
+        eliminarSoldado(tablero->jugadores[jugador].soldados, &tablero->jugadores[jugador].soldadosRestantes, soldado);
+    }
 }
 
 void moverSoldado(Tablero_t* tablero, int jugador, int soldadoAMover){
@@ -334,15 +372,9 @@ void moverSoldado(Tablero_t* tablero, int jugador, int soldadoAMover){
     
     do{
         obtenerDireccion(&direccion);
-        aux = obtenerCoordenadaNueva(tablero->jugador1.soldados[soldadoAMover], direccion);
+        aux = obtenerCoordenadaNueva(tablero->jugadores[jugador-1].soldados[soldadoAMover], direccion);
     } while(!coordenadaMovible(tablero, aux, jugador));
-    
-    if(jugador == 1){
-        copiarCoordenada(&tablero->jugador1.soldados[soldadoAMover], aux);
-    } else {
-        copiarCoordenada(&tablero->jugador2.soldados[soldadoAMover], aux);
-    }
-    //actualizarPosicion(tablero, jugador, soldadoAMover, aux);
+    copiarCoordenada(&tablero->jugadores[jugador].soldados[soldadoAMover], aux);
     efectuarColision(tablero, jugador, soldadoAMover);
     // Chequear colision y efectuar acciones
     // Soldado - Soldado (Ambos mueren)
@@ -355,14 +387,14 @@ void turnoJugador(Tablero_t* tablero, int jugador){
     //Preguntar a donde quiere moverlo
     //Comprobar si hay mina
     //Comprobar si hay soldado
-    int soldadoAMover = (jugador == 1)? seleccionarSoldado(tablero->jugador1) -1 : seleccionarSoldado(tablero->jugador2) -1;
+    int soldadoAMover = seleccionarSoldado(tablero->jugadores[jugador]) -1;
     moverSoldado(tablero, jugador, soldadoAMover);
 }
 
 void jugar(Tablero_t* tablero){
     mostrarTablero(*tablero);
     while(tablero->estado == 0){
-        comprobarEstado(tablero->jugador1.soldados, tablero->jugador2.soldados, &tablero->estado);
+        comprobarEstado(tablero->jugadores[1].soldados, tablero->jugadores[2].soldados, &tablero->estado);
         if(tablero->estado != 0)
             break;
         turnoJugador(tablero, 1);
