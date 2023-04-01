@@ -1,0 +1,125 @@
+#############################################################################################################
+#############################################################################################################
+###                                                                                                       ###
+###                                                                                                       ###
+###                 M A N U A L                                                                           ###
+###                                   D E L                                           V 1 . 0             ###
+###                                                 J U G A D O R                                         ###
+###                                                                                                       ###
+#############################################################################################################
+#############################################################################################################
+
+--------------
+1.0 Compilar.
+--------------
+
+        Para poder compilarlo (Linux) lo cual es requerido para jugar, debemos hacer
+
+        g++ juego.cpp -o juego
+
+1.1
+
+        Para poder ejecutar el juego =>   ./juego
+
+
+-----------
+2.0 Jugar.
+-----------
+
+        Al comienzo se mostrarán las reglas del juego:
+
+            Las reglas son simples: 
+            1. Cada jugador tiene 4 soldados y un número prefijado de minas
+            2. Pueden elegir entre ingresarlas manualmente o automaticamente
+            3. Los soldados se mueven en las 8 direcciones posibles
+            4. Si un soldado se encuentra con una mina, se inactiva el casillero, y muere
+            5. Si un soldado se encuentra con otro soldado, ambos mueren
+            6. El juego termina cuando un jugador no tiene soldados
+            -----------------------------------
+            Presione enter para continuar
+
+2.1
+
+        Primero se solicitara el acuerdo de cuantas minas quiere que se tenga por equipo
+        esta puede ser de 1 a 100
+
+2.1.1 
+
+        Posterior a esto, se le solicitara el nombre por el cual llamar al jugador 1
+        se debe ingresar un nombre menor a 10 caracteres.
+
+2.1.2
+
+        Se le solicitara si quiere que las minas y los soldados se introduzcan automáticamente (Y/N)
+
+2.1.3
+
+        Si usted solicito el ingreso manual de las piezas:
+
+        Primero se colocaran las coordenadas de los soldados,
+        y Segundo la de las minas
+
+        Para ello hay que ingresarlo en el siguiente formato: x Y
+        Por ejemplo:
+        
+        Soldado: 1 1
+        Soldado: 1 2
+        Soldado 10 10
+        Mina: 4 5
+        Mina: 1 3
+
+        Recuerde que el tamaño esta delimitado entre 0 y 20
+
+2.1.4
+
+        Los procesos del 2.1.1 a 2.1.3 se repetiran por cada jugador
+
+-------------
+3.0 Partida.
+-------------
+
+        Al arrancar el turno, se generaran 2 archivos
+        
+        jugador1.txt
+        jugador2.txt
+
+        Cada archivo corresponde a cada jugador, y por norma, no deben leer el del jugador contrario
+
+        Este archivo posee la informacion de la ubicacion de cada soldado
+        Soldados y Minas restantes propias
+        y la ubicacion de TUS propias minas (No las del enemigo)
+
+        Por lo cual es importante no revelar esa informacion al enemigo.
+
+3.1
+
+        Para realizar su turno, debe seleccionar uno de sus soldados
+        Cada uno estara denotado por un indice (1, 2, 3, 4)
+        y para tener referencia de ello, se muestra su coordenada
+
+        TIP: Tenga en cuenta que el diseño del archivo esta hecho para que pueda consultarlo con cualquier
+                editor de texto que posea un contador de lineas en su latera, para que sea mas legible la coordenada
+        
+        Recuerde que las coordenadas estan en forma cartesiana
+        por lo cual 1 1, es la esquina inferior izquierda, y 20 20, la superior derecha.
+
+3.2
+
+        Una vez seleccionado el soldado
+        debe elegir una de las direcciones mediante el estandar de cualquier videojuego
+
+        W -> Arriba
+        A -> Izquierda
+        S -> Abajo
+        D -> Derecha
+        W-A -> Arriba + Izquierda
+        W-D -> Arriba + Derecha
+        S-A -> Abajo + Izquierda
+        S-D -> Abajo + Derecha
+
+        Recuerde que no puede pisar sus propias minas o sus propios soldados o salirse del mapa o entrar a celdas inactivas
+        Solo puede colisionar Soldado aliado con Soldado enemigo o mina enemiga
+
+3.3
+
+        El juego finalizara indicando quien sobrevivio a la batalla.

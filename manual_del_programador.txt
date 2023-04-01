@@ -1,0 +1,252 @@
+#############################################################################################################
+#############################################################################################################
+###                                                                                                       ###
+###                                                                                                       ###
+###                 M A N U A L                                                                           ###
+###                                   D E L                                           V 1 . 0             ###
+###                                                 P R O G R A M A D O R                                 ###
+###                                                                                                       ###
+#############################################################################################################
+#############################################################################################################
+
+A continuacion se detallaran las pre y post condiciones de todas las funciones y como utilizarlas en el orden que fueron definidas.
+-----------------------------------------------------------------------------------------------------------------------------------
+
+
+Funcion que dada una coordenada x e y, devuelve true si se encuentra dentro del rango del tablero, false en caso contrario.
+Recibe: 2 enteros x e y
+Devuelve: true si se encuentra dentro del rango del tablero, false en caso contrario.
+    
+    bool estaEnRango(int x, int y);
+
+-----------------------------------------------------------------------------------------------------------------------------------
+
+Funcion que dada una coordenada x e y, devuelve true si se encuentra dentro del rango del tablero, false en caso contrario.
+Recibe: un vector de coordenadas, su tope, y la coordenada a comparar
+Devuelve: true si la coordenada posicion esta en el array
+    
+    bool estaEnArray(Coordenada_t* array, int tope, Coordenada_t posicion);
+
+-----------------------------------------------------------------------------------------------------------------------------------
+
+Procedimiento que solicita el nombre del jugador
+Recibe: un puntero a string, y el numero de jugador
+
+    void preguntarNombre(string* nombre, int jugador);
+
+-----------------------------------------------------------------------------------------------------------------------------------
+
+Procedimiento que solicita la cantidad de minas a utilizar en el juego
+Recibe: un puntero a entero
+
+    void preguntarCantidadMinas(int* minas);
+
+-----------------------------------------------------------------------------------------------------------------------------------
+
+Procedimiento que solicita el metodo de insercion de los soldados
+Recibe: un puntero a booleano, y el numero de jugador
+
+    void preguntarMetodoInsercion(bool* metodo, int jugador);
+
+-----------------------------------------------------------------------------------------------------------------------------------
+
+Procedimiento que inicializa los parametros iniciales de la partida
+Recibe: un puntero a tablero_t, y un puntero a booleano
+
+    void iniciarParametros(Tablero_t* tablero, bool* automatico);
+
+-----------------------------------------------------------------------------------------------------------------------------------
+
+Procedimiento que muestra el mensaje de victoria del jugador especificado
+Recibe: un entero jugador, y un string nombre
+
+    void mensajeVictoria(int jugador, string nombre);
+
+-----------------------------------------------------------------------------------------------------------------------------------
+
+Procedimiento que muestra el mensaje de final de partida
+Recibe: un entero estado, y dos strings nombre1 y nombre2
+
+    void mensajeFinal(int estado, string nombre1, string nombre2);
+
+-----------------------------------------------------------------------------------------------------------------------------------
+
+Funcion que devuelve una coordenada aleatoria
+
+    Coordenada_t coordenadaAleatoria();
+
+-----------------------------------------------------------------------------------------------------------------------------------
+
+Funcion que devuelve true si la coordenada pasada por parametro se encuentra libre, false en caso contrario
+Recibe: un tablero_t, y una coordenada_t
+Devuelve: true si la coordenada esta libre, false en caso contrario
+
+    bool coordenadaLibre(Tablero_t tablero, Coordenada_t posicion);
+
+-----------------------------------------------------------------------------------------------------------------------------------
+
+Funcion que devuelve una coordenada aleatoria libre
+Recibe: un tablero_t
+Devuelve: una coordenada_t
+
+    Coordenada_t coordenadaLibreAleatoria(Tablero_t tablero);
+
+-----------------------------------------------------------------------------------------------------------------------------------
+
+Procedimiento que solicita una coordenada al usuario
+Recibe: un tablero_t, y un puntero a Coordenada_t
+
+    void preguntarCoordenada(Tablero_t tablero, Coordenada_t* posicion);
+
+-----------------------------------------------------------------------------------------------------------------------------------
+
+Procedimiento que carga los datos del jugador de forma automatica
+Recibe: un puntero a tablero_t
+
+    void cargaAutomatica(Tablero_t* tablero);
+
+-----------------------------------------------------------------------------------------------------------------------------------
+
+Procedimiento que carga los datos del jugador de forma manual
+Recibe: un puntero a tablero_t
+
+    void cargaManual(Tablero_t* tablero);
+
+-----------------------------------------------------------------------------------------------------------------------------------
+
+Procedimiento que carga los datos de los jugadores en la partida
+Recibe: un puntero a tablero_t, y un booleano automatico
+
+    void cargarJuego(Tablero_t* tablero, bool automatico);
+
+-----------------------------------------------------------------------------------------------------------------------------------
+
+Procedimiento que imprime los tableros de cada jugador en archivos
+Recibe: un tablero_t
+
+    void mostrarTablero(Tablero_t tablero);
+
+-----------------------------------------------------------------------------------------------------------------------------------
+
+Procedimiento que comprueba si el juego ha finalizado
+Recibe: un puntero a entero, y dos jugadores_t
+
+    void comprobarEstado(Jugador_t jug1, Jugador_t jug2, int* estado);
+
+-----------------------------------------------------------------------------------------------------------------------------------
+
+Funcion que solicita al jugador que seleccione un soldado
+Recibe: un jugador_t
+Devuelve: un entero
+
+    int seleccionarSoldado(Jugador_t jugador);
+
+-----------------------------------------------------------------------------------------------------------------------------------
+
+Funcion que solicita al jugador la direccion a la que se desea mover
+Recibe: un puntero a string
+
+    void obtenerDireccion(string* direccion);
+
+-----------------------------------------------------------------------------------------------------------------------------------
+
+Funcion que dada la direccion, devuelve la nueva coordenada del soldado
+Recibe: una coordenada_t, y un string direccion
+Devuelve: una coordenada_t
+
+    Coordenada_t obtenerCoordenadaNueva(Coordenada_t soldado, string direccion);
+
+-----------------------------------------------------------------------------------------------------------------------------------
+
+Funcion que devuelte true si el soldado colisiona con un casillero inactivo
+Recibe: una coordenada_t, un vector de casilleros inactivos, y un entero inactivosRestantes
+Devuelve: true si colisiona, false en caso contrario
+
+    bool colisionaConInactivo(Coordenada_t soldado, CasilleroInactivo_t inactivos[MAX_MINAS], int inactivosRestantes);
+
+-----------------------------------------------------------------------------------------------------------------------------------
+
+Funcion que devuelve true si el movimiento es posible
+Recibe: un tablero_t, una coordenada_t, y un entero jugador
+Devuelve: true si el movimiento es posible, false en caso contrario
+
+    bool coordenadaMovible(Tablero_t* tablero, Coordenada_t posicion, int jugador);
+
+-----------------------------------------------------------------------------------------------------------------------------------
+
+Procedimiento que copia un struct Coordenada_t en otro
+Recibe: un puntero a Coordenada_t, y un Coordenada_t
+
+    void copiarCoordenada(Coordenada_t* destino, Coordenada_t fuente);
+
+-----------------------------------------------------------------------------------------------------------------------------------
+
+Procedimiento que agrega una mina activada a la lista de minas inactivas
+Recibe: un puntero a tablero_t, y una coordenada_t
+
+    void actualizarCasillerosInactivos(Coordenada_t fuente, Tablero_t* tablero);
+
+-----------------------------------------------------------------------------------------------------------------------------------
+
+Procedimiento que alterna 2 elementos de un vector Coordenada_t (intice vs ultimo)
+Recibe: un puntero a Coordenada_t, un entero indice, y un entero tope
+
+    void swapCoordenada(int indice, int tope, Coordenada_t* posiciones);
+
+-----------------------------------------------------------------------------------------------------------------------------------
+
+Procedimiento que elimina un soldado del vector de soldados de manera desordenada
+Recibe: un puntero a Coordenada_t, un puntero a entero, y un entero soldado
+
+    void eliminarSoldado(Coordenada_t soldados[MAX_SOLDADOS], int* soldadosRestantes, int soldado);
+
+-----------------------------------------------------------------------------------------------------------------------------------
+
+Funcion que devuelve el indice del soldado que se encuentra en la posicion pasada por parametro
+Recibe: un vector de Coordenada_t, un entero soldadosRestantes, y una coordenada_t posicion
+Devuelve: un entero
+
+    int findCoordenadaMatch(Coordenada_t soldados[MAX_SOLDADOS], int soldadosRestantes, Coordenada_t posicion);
+
+-----------------------------------------------------------------------------------------------------------------------------------
+
+Procedimiento que efectua la colision de un soldado con una mina u otro soldado
+Recibe: un puntero a tablero_t, un entero jugador, y un entero soldado
+
+    void efectuarColision(Tablero_t* tablero, int jugador, int soldado);
+
+-----------------------------------------------------------------------------------------------------------------------------------
+
+Procedimiento que actualiza los turnos restantes de los casilleros
+Recibe: un puntero a tablero_t
+
+    void comprobarInactivas(CasilleroInactivo_t* inactivos, int* cantidadInactivos);
+
+-----------------------------------------------------------------------------------------------------------------------------------
+
+Procedimiento que mueve un soldado en el tablero
+Recibe: un puntero a tablero_t, un entero jugador, y un entero soldado
+
+    void moverSoldado(Tablero_t* tablero, int jugador, int soldadoAMover);
+
+-----------------------------------------------------------------------------------------------------------------------------------
+
+Procedimiento que ejecuta el turno de un jugador
+Recibe: un puntero a tablero_t, y un entero jugador
+
+    void turnoJugador(Tablero_t* tablero, int jugador);
+
+-----------------------------------------------------------------------------------------------------------------------------------
+
+Procedimiento que ejecuta la partida
+Recibe: un puntero a tablero_t
+
+    void jugar(Tablero_t* tablero);
+
+-----------------------------------------------------------------------------------------------------------------------------------
+
+Procedimiento que muestra el menu de bienvenida
+
+void menuBienvenida();
+
+-----------------------------------------------------------------------------------------------------------------------------------
