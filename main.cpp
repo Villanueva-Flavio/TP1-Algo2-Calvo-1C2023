@@ -26,7 +26,7 @@ typedef struct CasilleroInactivo{
 } CasilleroInactivo_t;
 
 typedef struct Jugador{
-    std::string nombre;
+    string nombre;
     Coordenada_t minas[MAX_MINAS];
     Coordenada_t soldados[MAX_SOLDADOS];
     int soldadosRestantes;
@@ -40,6 +40,7 @@ typedef struct Tablero{
     int estado;
     int cantidadInactivos;
 }Tablero_t;
+
 
 const string FILE_NAME[JUGADORES] = {"jugador1.txt", "jugador2.txt"};
 
@@ -67,9 +68,10 @@ bool estaEnArray(Coordenada_t* array, int tope, Coordenada_t posicion){
     return false;
 }
 
-void preguntarNombre(string* nombre){
-    cout << "Ingrese el nombre del jugador, maximo 10 caracteres: ";
+void preguntarNombre(string* nombre, int jugador){
+    cout << "Jugador " << jugador + 1 << " ingrese su nombre (MAX: 10 caracteres): ";
     cin >> *nombre;
+    cout << endl;
     while(nombre->length() > 10){
         cout << "Por favor no exceda los 10 caracteres: ";
         cin >> *nombre;
@@ -77,42 +79,54 @@ void preguntarNombre(string* nombre){
 }
 
 void preguntarCantidadMinas(int* minas){
-    cout << "Ingrese la cantidad de minas (MAX: 100): " << endl;
+    cout << "A continuación ingrese la cantidad de minas (MAX: 100): " ;
     cin >> *minas;
+    cout << endl;
     while (*minas > MAX_MINAS || *minas < 1) {
-        cout << "Ingrese la cantidad de minas: ";
+        cout << "Por favor eliga entre 1 y 100: ";
         cin >> *minas;
+        cout << endl;
     }
 }
 
-void preguntarMetodoInsercion(bool* metodo){
-    cout << "Quiere ingresar las minas y los soldados automaticamente? Y/N" << endl;
+void preguntarMetodoInsercion(bool* metodo, int jugador){
+    cout << "Jugador " << jugador + 1 << " desea que las minas y soldados se inserten de forma automatica? (Y/N): ";
     char respuesta;
     cin >> respuesta;
+    cout << endl;
     while(respuesta != 'Y' && respuesta != 'y' && respuesta != 'N' && respuesta != 'n'){
         cout << "Por favor ingrese Y o N: ";
         cin >> respuesta;
+        cout << endl;
     }
     *metodo = (respuesta =='Y' || respuesta == 'y')? true : false;    
 }
 
 void iniciarParametros(Tablero_t* tablero, bool* automatico){
+    system("clear");
     preguntarCantidadMinas(&tablero->jugadores[0].minasRestantes);
     tablero->jugadores[1].minasRestantes = tablero->jugadores[0].minasRestantes;
     for(int i = 0; i < JUGADORES; i++){
-        preguntarNombre(&tablero->jugadores[i].nombre);
-        preguntarMetodoInsercion(automatico);
+        system("clear");
+        preguntarNombre(&tablero->jugadores[i].nombre, i);
+        preguntarMetodoInsercion(automatico, i);
         tablero->jugadores[i].soldadosRestantes = 4;
     }
 }
 
-void mensajeFinal(int estado){
+void mensajeVictoria(int jugador, string nombre){
+    cout << "##############################################" << endl;
+    cout << "El jugador " << jugador << ": " << nombre << " ha ganado la partida" << endl;
+    cout << "##############################################" << endl;
+}
+
+void mensajeFinal(int estado, string nombre1, string nombre2){
     switch (estado) {
         case 1:
-            cout << "Gano el jugador 1" << endl;
+            mensajeVictoria(1, nombre1);
             break;
         case 2:
-            cout << "Gano el jugador 2" << endl;
+            mensajeVictoria(2, nombre2);
             break;
         case 3:
             cout << "Empate" << endl;
@@ -198,26 +212,28 @@ void mostrarTablero(Tablero_t tablero){
 
     for(int i = 0; i < JUGADORES; i++){
         fileActual = i == 0? file : file2;
-        fprintf(fileActual, "Jugador %s:\n", tablero.jugadores[i].nombre.c_str());
-        fprintf(fileActual, "Minas restantes: %i\n", tablero.jugadores[i].minasRestantes);
-        fprintf(fileActual, "Soldados restantes: %i\n\n", tablero.jugadores[i].soldadosRestantes);
-
-        for(int j = 0; j < SIZE; j++){
-            for(int k = 0; k < SIZE; k++){
-                if(estaEnArray(tablero.jugadores[i].minas, tablero.jugadores[i].minasRestantes, {j, k})){
+        
+        for(int y = SIZE-1; y >= 0; y--){
+            fprintf(fileActual, "| ");
+            for(int x = 0; x < SIZE; x++){
+                if(estaEnArray(tablero.jugadores[i].minas, tablero.jugadores[i].minasRestantes, {x, y})){
                     fprintf(fileActual, "M ");
-                }else if(estaEnArray(tablero.jugadores[i].soldados, tablero.jugadores[i].soldadosRestantes, {j, k})){
+                }else if(estaEnArray(tablero.jugadores[i].soldados, tablero.jugadores[i].soldadosRestantes, {x, y})){
                     equipoSoldado = (i == 0)? '1' : '2';
                     fprintf(fileActual, "%c ", equipoSoldado);
-                }else if(estaEnArray(tablero.jugadores[1-i].soldados, tablero.jugadores[1-i].soldadosRestantes, {j, k})){
+                }else if(estaEnArray(tablero.jugadores[1-i].soldados, tablero.jugadores[1-i].soldadosRestantes, {x, y})){
                     equipoSoldado = (i == 0)? '2' : '1';
                     fprintf(fileActual, "%c ", equipoSoldado);
                 }else{
                     fprintf(fileActual, "  ");
                 }
             }
-            fprintf(fileActual, "\n");
+            fprintf(fileActual, "|\n");
         }
+        fprintf(fileActual, "|_________________________________________|\n");
+        fprintf(fileActual, "Jugador %s:\n", tablero.jugadores[i].nombre.c_str());
+        fprintf(fileActual, "Minas restantes: %i\n", tablero.jugadores[i].minasRestantes);
+        fprintf(fileActual, "Soldados restantes: %i\n\n", tablero.jugadores[i].soldadosRestantes);
     }
     fclose(file);
     fclose(file2);
@@ -236,35 +252,35 @@ void comprobarEstado(Jugador_t jug1, Jugador_t jug2, int* estado){
 }
 
 int seleccionarSoldado(Jugador_t jugador){
-    cout << "Seleccione el soldado que desea mover: ";
     int resultado;
+    cout << "Seleccione el soldado que desea mover: ";
+    cout << "Sus soldados: " << endl;
+    for(int i = 0; i < jugador.soldadosRestantes; i++){
+        cout << i+1 << " - " << jugador.soldados[i].x << " " << jugador.soldados[i].y << endl;
+    }
     cin >> resultado;
+    cout << endl;
     while(resultado < 1 || resultado > jugador.soldadosRestantes){
         cout << "Por favor ingrese un numero valido: ";
         cin >> resultado;
+        cout << endl;
     }
     return resultado;
 }
 
 void obtenerDireccion(string* direccion){
     cin >> *direccion;
+    cout << endl;
     while(*direccion != "W" && *direccion != "A" && *direccion != "S" && *direccion != "D" && *direccion != "WA" && *direccion != "WD" && *direccion != "SA" && *direccion != "SD"){
         cout << "Por favor ingrese una direccion valida: ";
         cin >> *direccion;
+        cout << endl;
     }
 }
 
 Coordenada_t obtenerCoordenadaNueva(Coordenada_t soldado, string direccion){
     auto it = coordenadas_nuevas.find(direccion);
-    return it != coordenadas_nuevas.end() ? Coordenada_t{soldado.x + it->second.x, soldado.y + it->second.y} : soldado;
-}
-
-bool colisionaConMina(Coordenada_t soldado, Coordenada_t minas[MAX_MINAS], int minasRestantes){
-    return estaEnArray(minas, minasRestantes, soldado);
-}
-
-bool colisionaConSoldado(Coordenada_t soldado, Coordenada_t soldados[MAX_SOLDADOS]){
-    return estaEnArray(soldados, MAX_SOLDADOS, soldado);
+    return it != coordenadas_nuevas.end() ? Coordenada_t{soldado.x + it->second.x, soldado.y - it->second.y} : soldado;
 }
 
 bool colisionaConInactivo(Coordenada_t soldado, CasilleroInactivo_t inactivos[MAX_MINAS], int inactivosRestantes){
@@ -280,9 +296,9 @@ bool coordenadaMovible(Tablero_t* tablero, Coordenada_t posicion, int jugador){
     bool resultado = true;
     for(int i = 0; i < JUGADORES; i++){
         if(!estaEnRango(posicion.x, posicion.y) || 
-        colisionaConMina(posicion, tablero->jugadores[i].minas, tablero->jugadores[i].minasRestantes) ||
+        estaEnArray(tablero->jugadores[i].minas, tablero->jugadores[i].minasRestantes, posicion) ||
         colisionaConInactivo(posicion, tablero->casillerosInactivos, tablero->cantidadInactivos) ||
-        colisionaConSoldado(posicion, tablero->jugadores[i].soldados)) {
+        estaEnArray(tablero->jugadores[i].soldados, tablero->jugadores[i].soldadosRestantes, posicion)) {
             cout << "Coordenada Invalida" << endl;
             resultado = false;
         }
@@ -327,13 +343,13 @@ int findCoordenadaMatch(Coordenada_t soldados[MAX_SOLDADOS], int soldadosRestant
 
 void efectuarColision(Tablero_t* tablero, int jugador, int soldado){
     Coordenada_t posicion = tablero->jugadores[jugador].soldados[soldado];
-    if(colisionaConMina(posicion, tablero->jugadores[jugador].minas, tablero->jugadores[jugador].minasRestantes)){
+    if(estaEnArray(tablero->jugadores[jugador].minas, tablero->jugadores[jugador].minasRestantes, posicion)){
         actualizarCasillerosInactivos(posicion, tablero);
         tablero->jugadores[jugador].minasRestantes--;
         eliminarSoldado(tablero->jugadores[jugador].soldados, &tablero->jugadores[jugador].soldadosRestantes, soldado);
-    } else if (colisionaConSoldado(posicion, tablero->jugadores[1-jugador].soldados)){
+    } else if (estaEnArray(tablero->jugadores[1-jugador].soldados, tablero->jugadores[1-jugador].soldadosRestantes, posicion)){
         tablero->jugadores[1-jugador].soldadosRestantes--;
-        eliminarSoldado(tablero->jugadores[1-jugador].soldados, &tablero->jugadores[1-jugador].soldadosRestantes, findCoordenadaMatch(tablero->jugadores[1-jugador].soldados, MAX_SOLDADOS, posicion));
+        eliminarSoldado(tablero->jugadores[1-jugador].soldados, &tablero->jugadores[1-jugador].soldadosRestantes, findCoordenadaMatch(tablero->jugadores[1-jugador].soldados, tablero->jugadores[1-jugador].soldadosRestantes, posicion));
         eliminarSoldado(tablero->jugadores[jugador].soldados, &tablero->jugadores[jugador].soldadosRestantes, soldado);
     }
 }
@@ -356,7 +372,7 @@ void comprobarInactivas(CasilleroInactivo_t* inactivos, int* cantidadInactivos){
 void moverSoldado(Tablero_t* tablero, int jugador, int soldadoAMover){
     string direccion;
     Coordenada_t aux;
-    cout << "Seleccione la direccion a la que desea moverlo (W A S D W-A W-D S-A S-D): ";
+    cout << "Seleccione la direccion a la que desea moverlo (W A S D W-A W-D S-A S-D): " << endl;
     do{
         obtenerDireccion(&direccion);
         aux = obtenerCoordenadaNueva(tablero->jugadores[jugador].soldados[soldadoAMover], direccion);
@@ -365,6 +381,8 @@ void moverSoldado(Tablero_t* tablero, int jugador, int soldadoAMover){
 }
 
 void turnoJugador(Tablero_t* tablero, int jugador){
+    system("clear");
+    cout << "Turno del jugador " << jugador+1 << endl;
     int soldadoAMover = seleccionarSoldado(tablero->jugadores[jugador]) -1;
     moverSoldado(tablero, jugador, soldadoAMover);
     efectuarColision(tablero, jugador, soldadoAMover);
@@ -375,8 +393,9 @@ void jugar(Tablero_t* tablero){
     mostrarTablero(*tablero);
     while(tablero->estado == 0){
         comprobarEstado(tablero->jugadores[0], tablero->jugadores[1], &tablero->estado);
-        if(tablero->estado != 0)
+        if(tablero->estado != 0){
             break;
+        }
         turnoJugador(tablero, 0);
         turnoJugador(tablero, 1);
         mostrarTablero(*tablero);
@@ -384,13 +403,29 @@ void jugar(Tablero_t* tablero){
     }
 }
 
+void menuBienvenida(){
+    cout << "Bienvenido al juego de la BATALLA DIGITAL V1.0" << endl;
+    cout << "-----------------------------------" << endl;
+    cout << "Las reglas son simples: " << endl;
+    cout << "1. Cada jugador tiene 5 soldados y un número prefijado de minas" << endl;
+    cout << "2. Pueden elegir entre ingresarlas manualmente o automaticamente" << endl;
+    cout << "3. Los soldados se mueven en las 8 direcciones posibles" << endl;
+    cout << "4. Si un soldado se encuentra con una mina, se inactiva el casillero, y muere" << endl;
+    cout << "5. Si un soldado se encuentra con otro soldado, ambos mueren" << endl;
+    cout << "6. El juego termina cuando un jugador no tiene soldados" << endl;
+    cout << "-----------------------------------" << endl;
+    cout << "Presione enter para continuar" << endl;
+    cin.get();
+}
+
 int main() {
     srand((unsigned int)time(NULL));
     Tablero_t tablero;
     bool automatico = false;
+    menuBienvenida();
     iniciarParametros(&tablero, &automatico);
     cargarJuego(&tablero, automatico);
     jugar(&tablero);
-    mensajeFinal(tablero.estado);
+    mensajeFinal(tablero.estado, tablero.jugadores[0].nombre, tablero.jugadores[1].nombre);
     return 0;
 }
